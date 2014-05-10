@@ -1,0 +1,35 @@
+%
+% Provides a LaTeX environment for Pandoc-rendered Markdown.
+%
+% Requires the `pandoc` executable to be on your PATH.
+% Pandoc's home page is here: http://johnmacfarlane.net/pandoc/
+%
+% This small package is based on this StackExchange answer:
+% http://tex.stackexchange.com/a/101731
+% 
+\ProvidesPackage{markdown}
+\RequirePackage{fancyvrb}
+
+
+%
+% Configuration options. Use \renewcommand to override if needed.
+%
+
+% Prefix to use for temporary files.
+\newcommand{\markdownTmp}{\jobname-markdown-tmp}
+
+% Additional arguments to pass to Pandoc.
+\newcommand{\pandocArgs}{}
+
+
+%
+% The markdown environment.
+%
+
+\newenvironment{markdown}%
+  {\VerbatimEnvironment%
+   \begin{VerbatimOut}{\markdownTmp.md}}%
+  {\end{VerbatimOut}%
+   \immediate\write18{pandoc \pandocArgs \markdownTmp.md -t latex -o \markdownTmp.tex}%
+   \input{\markdownTmp.tex}%
+   \immediate\write18{rm \markdownTmp.md \markdownTmp.tex}}
