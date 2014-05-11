@@ -9,7 +9,7 @@
 % 
 \ProvidesPackage{markdown}
 \RequirePackage{fancyvrb}
-\RequirePackage{ifthen}
+\RequirePackage{xparse}
 
 
 %
@@ -32,7 +32,6 @@
 % Internal variable used to save an optional argument passed to the
 % markdown environment.
 \def\markdown@opt{}
-\def\markdown@saveopt[#1]{\def\markdown@opt{#1}}
 
 % Execute pandoc in the shell.
 \newcommand{\markdown@pandoc}[1]{%
@@ -44,17 +43,22 @@
   \immediate\write18{rm \markdown@tmp.md \markdown@tmp.tex}%
 }
 
+% A helper function to support an optional argument in the markdown
+% environment, which is difficult since it's a verbatim environment.
+% Based on: http://tex.stackexchange.com/a/111990
+\NewDocumentCommand{\markdown@helper}{o}{%
+  \endgroup\IfNoValueF{#1}{\def\markdown@opt{#1}}%
+  \begin{VerbatimOut}{\markdown@tmp.md}%
+}
+
 % The markdown environment. Accepts an optional argument containing
 % additional arguments to pass to Pandoc.
-\newenvironment{markdown}{%
+\NewDocumentEnvironment{markdown}{}{%
   \VerbatimEnvironment%
-  \begingroup\obeylines%
-  \@ifnextchar[{\markdown@saveopt}{\markdown@saveopt[]}%
-  \endgroup%
-  \begin{VerbatimOut}{\markdown@tmp.md}%
+  \begingroup\obeylines\markdown@helper%
 }{%
   \end{VerbatimOut}%
   \markdown@pandoc{\markdown@opt}%
   \input{\markdown@tmp.tex}%
   \markdown@cleanup%
-}%
+}
