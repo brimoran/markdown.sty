@@ -9,27 +9,52 @@
 % 
 \ProvidesPackage{markdown}
 \RequirePackage{fancyvrb}
+\RequirePackage{ifthen}
 
 
 %
-% Configuration options. Use \renewcommand to override if needed.
+% Configuration options
 %
 
-% Prefix to use for temporary files.
-\newcommand{\markdownTmp}{\jobname-markdown-tmp}
+% Prefix to use for temporary files. Use \renewcommand to override if needed.
+\newcommand{\markdown@tmp}{\jobname-markdown-tmp}
 
-% Additional arguments to pass to Pandoc.
-\newcommand{\pandocArgs}{}
+% The main arguments to Pandoc. Use \renewcommand to override if needed.
+% Additional arguments can be passed as optional arguments to the \markdown
+% command or the markdown environment.
+\newcommand{\markdown@args}{\markdown@tmp.md -t latex -o \markdown@tmp.tex}
 
 
 %
-% The markdown environment.
+% Internals
 %
 
-\newenvironment{markdown}%
-  {\VerbatimEnvironment%
-   \begin{VerbatimOut}{\markdownTmp.md}}%
-  {\end{VerbatimOut}%
-   \immediate\write18{pandoc \pandocArgs \markdownTmp.md -t latex -o \markdownTmp.tex}%
-   \input{\markdownTmp.tex}%
-   \immediate\write18{rm \markdownTmp.md \markdownTmp.tex}}
+% Internal variable used to save an optional argument passed to the
+% markdown environment.
+\def\markdown@opt{}
+\def\markdown@saveopt[#1]{\def\markdown@opt{#1}}
+
+% Execute pandoc in the shell.
+\newcommand{\markdown@pandoc}[1]{%
+  \immediate\write18{pandoc #1 \markdown@args}%
+}
+
+% Delete the temp file.
+\newcommand{\markdown@cleanup}{%
+  \immediate\write18{rm \markdown@tmp.md \markdown@tmp.tex}%
+}
+
+% The markdown environment. Accepts an optional argument containing
+% additional arguments to pass to Pandoc.
+\newenvironment{markdown}{%
+  \VerbatimEnvironment%
+  \begingroup\obeylines%
+  \@ifnextchar[{\markdown@saveopt}{\markdown@saveopt[]}%
+  \endgroup%
+  \begin{VerbatimOut}{\markdown@tmp.md}%
+}{%
+  \end{VerbatimOut}%
+  \markdown@pandoc{\markdown@opt}%
+  \input{\markdown@tmp.tex}%
+  \markdown@cleanup%
+}%
