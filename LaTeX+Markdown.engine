@@ -1,0 +1,7 @@
+#!/bin/bash
+
+PANDOC_PATH=~/Library/Haskell/bin
+
+PATH=$PANDOC_PATH:/usr/texbin:$PATH
+
+pdflatex --file-line-error --synctex=1 --shell-escape $1
