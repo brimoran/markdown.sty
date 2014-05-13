@@ -1,0 +1,144 @@
+% !TEX TS-program = LaTeX+Markdown
+\documentclass{article}
+
+% Settings specific to this document.
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[osf,sc]{mathpazo}
+\usepackage[scaled=0.85]{beramono}
+\usepackage[parfill]{parskip}
+\linespread{1.05}
+
+% Pandoc assumes these packages are present. However, many can be excluded
+% if your document doesn't use all features of Pandoc Markdown.
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage[colorlinks]{hyperref}
+\usepackage{ifluatex,ifxetex}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage[normalem]{ulem}
+\usepackage{url}
+\ifxetex
+  \usepackage{fontspec}
+  \usepackage{xltxtra}
+  \usepackage{xunicode}
+\fi
+\ifluatex
+  \usepackage{fontspec}
+\fi
+
+% Include markdown.sty.
+\usepackage{markdown}
+
+% Set up formatting of Haskell listings.
+\lstset{
+  language=Haskell,
+  basicstyle=\ttfamily,
+  xleftmargin=2ex,
+  keywordstyle=,
+  flexiblecolumns=false,
+  literate={->}{{$\rightarrow$}}2 {=>}{{$\Rightarrow$}}2 {\\}{{$\lambda$}}1
+}
+
+\begin{document}
+
+\title{Pandoc-rendered Markdown in \LaTeX}
+\author{Eric Walkingshaw \\ \small eric@walkingshaw.net}
+\date{}
+\maketitle
+
+\begin{markdown}
+The `markdown.sty` package allows you to write [Markdown]-formatted text inside
+of \LaTeX\ using the `markdown` environment and the `\markd` command. In fact,
+the text you're reading *right now* is [Pandoc]-rendered Markdown.^[That is,
+unless you're reading the source code, in which case it's not yet rendered. :-)] 
+
+[Markdown]: http://daringfireball.net/projects/markdown/
+[Pandoc]: http://johnmacfarlane.net/pandoc/
+\end{markdown}
+
+The \texttt{markdown} environment is useful for blocks of Markdown-formatted
+text, such as the above paragraph. These blocks must be reasonably
+self-contained. For example, reference-style links (used above) must be defined
+within the same environment they are used.
+
+Using the \markd{`\markd`} command, you can include short snippets of Markdown
+\markd{*within*} regular text. This paragraph contains several examples. A use
+of the \markd{`\markd`} command cannot be split across multiple
+lines.\markd{^[Due to a limitation of the `xparse` package.]}
+
+\begin{markdown}
+Within the `markdown` environment, you can use all of the usual Markdown
+features plus Pandoc's [neat extensions][Exts]. We've seen footnotes, links,
+and basic formatting already. Other useful features include in-line `code`
+`spans` and pre-formatted code blocks.
+
+      main() {
+        printf("Hello, world!");
+      }
+ 
+Also, itemized lists:
+ 
+ * Here's an item with a plain bullet.
+     i. And a nested item with a Roman numeral bullet.
+          a) And a nested--nested item with a different kind of bullet.
+ 
+An especially relevant Pandoc extension is support for embedded
+\LaTeX\ macros, including references (see Table \ref{tbl:dep}) and
+`$`-delimited math: $e^{i\pi} = -1$.
+
+[Exts]: http://johnmacfarlane.net/pandoc/README.html#pandocs-markdown
+\end{markdown}
+%stopzone % just to fix vim's syntax highlighting ...
+
+\begin{markdown}
+
+For some Markdown features, the \LaTeX\ code that Pandoc generates relies on
+external packages. These can be included in the usual way with `\usepackage`.
+The Pandoc documentation contains a [complete list][Pkgs] of the packages it
+assumes are loaded, or you can also find them at the top of the source that
+generated this document. If your document doesn't use every feature of Pandoc,
+you can omit some of these packages. A few of the dependencies I know about are
+listed in Table \ref{tbl:dep}. There are many others! Mostly this was just an
+excuse to show off tables and references in Markdown.
+
+[Pkgs]: http://johnmacfarlane.net/pandoc/README.html#creating-a-pdf
+\end{markdown}
+
+\begin{figure}[t]
+\begin{markdown}
+**Feature**          **Dependencies**
+-------------        -----------------------
+Images               `graphicx`
+Links                `hyperref`, `url`
+Strikethrough        `ulem`
+Syntax highlighting  `listings` (requires `--listings`)
+Tables               `booktabs`, `longtable`
+
+Table: \LaTeX\ package dependencies of Markdown features. \label{tbl:dep} 
+\end{markdown}
+\end{figure}
+
+\begin{markdown}
+Both the `markdown` environment and the `\markd` command accept an optional
+argument containing additional arguments to pass to Pandoc. One use of this is
+to add syntax highlighting and character replacement to code blocks with
+Pandoc's `--listings` option, as illustrated in the following Haskell code.
+\end{markdown}
+
+\begin{markdown}[--listings]
+~~~haskell
+plusOne :: Num a => [a] -> [a]
+plusOne = map (\a -> a + 1)
+~~~
+\end{markdown}
+
+
+\section*{Acknowledgments}
+\label{sec:ack}
+
+\end{document}
