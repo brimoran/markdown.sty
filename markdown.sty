@@ -29,6 +29,9 @@
 % Internals
 %
 
+% Declare a new file writer.
+\newwrite\markdown@write
+
 % Internal variable used to save an optional argument passed to the
 % markdown environment.
 \def\markdown@opt{}
@@ -60,5 +63,17 @@
   \end{VerbatimOut}%
   \markdown@pandoc{\markdown@opt}%
   \input{\markdown@tmp.tex}%
+  \markdown@cleanup%
+  \def\markdown@opt{}%
+}
+
+% The \markd command. Accepts an optional argument containing
+% additional arguments to pass to Pandoc. 
+\NewDocumentCommand{\markd}{O{} v}{%
+  \immediate\openout\markdown@write=\markdown@tmp.md%
+  \immediate\write\markdown@write{#2}%
+  \immediate\closeout\markdown@write%
+  \markdown@pandoc{#1}%
+  \input{\markdown@tmp.tex}\unskip%
   \markdown@cleanup%
 }
